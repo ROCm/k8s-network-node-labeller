@@ -1,0 +1,21 @@
+devices:
+  - id: "vf-1" # VF-1
+    pci_address: "0000:00:04.0"
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1003"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x5201"
+    device_class: "0x020000"
+    driver: "ionic"
+  - id: "vf-2" # VF-2
+    pci_address: "0000:00:05.0"
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1003"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x5201"
+    device_class: "0x020000"
+    driver: "ionic"
+
+drivers:
+  - name: "ionic"
+    version: "1.51.0-k"

@@ -1,0 +1,97 @@
+devices:
+  # First NIC
+  - id: "nic1-virtual-downstream-port"
+    pci_address: "0000:13:00.0"
+    # No parent - root device
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1001"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x5201"
+    device_class: "0x060400"
+  - id: "nic1-pf" # NIC1 PF
+    pci_address: "0000:14:00.0"
+    parent_address: "0000:13:00.0"
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1002"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x5201"
+    device_class: "0x020000"
+    driver: "ionic"
+  
+  # Second NIC
+  - id: "nic2-virtual-downstream-port"
+    pci_address: "0000:15:00.0"
+    # No parent - root device
+    pci_vendor_id: "0x8086"
+    pci_device_id: "0x1001"
+    subsystem_vendor_id: "0x8086"
+    subsystem_device_id: "0x2015"
+    device_class: "0x060400"
+  - id: "nic2-pf1" # NIC2 PF1
+    pci_address: "0000:16:00.0"
+    parent_address: "0000:15:00.0"
+    pci_vendor_id: "0x8086"
+    pci_device_id: "0x1572"
+    subsystem_vendor_id: "0x8086"
+    subsystem_device_id: "0x0001"
+    device_class: "0x020000"
+    driver: "ionic"
+  - id: "nic2-pf2" # NIC2 PF2
+    pci_address: "0000:16:00.1"
+    parent_address: "0000:15:00.0"
+    pci_vendor_id: "0x8086"
+    pci_device_id: "0x1572"
+    subsystem_vendor_id: "0x8086"
+    subsystem_device_id: "0x0001"
+    device_class: "0x020000"
+    driver: "ionic"
+  
+  # Third NIC
+  - id: "nic3-virtual-downstream-port"
+    pci_address: "0000:07:00.0"
+    # No parent - root device
+    pci_vendor_id: "0x15b3"
+    pci_device_id: "0x1001"
+    subsystem_vendor_id: "0x15b3"
+    subsystem_device_id: "0x2015"
+    device_class: "0x060400"
+  - id: "nic3-pf" # NIC3 PF
+    pci_address: "0000:08:00.0"
+    parent_address: "0000:07:00.0"
+    pci_vendor_id: "0x15b3"
+    pci_device_id: "0x1017"
+    subsystem_vendor_id: "0x15b3"
+    subsystem_device_id: "0x0001"
+    device_class: "0x020000"
+    driver: "ionic"
+  - id: "nic3-vf" # NIC3 VF
+    pci_address: "0000:08:00.1"
+    parent_address: "0000:07:00.0"
+    pci_vendor_id: "0x15b3"
+    pci_device_id: "0x1017"
+    subsystem_vendor_id: "0x15b3"
+    subsystem_device_id: "0x0001"
+    device_class: "0x020000"
+    driver: "ionic"
+
+  - id: "nic4-virtual-downstream-port"
+    pci_address: "0000:83:00.0"
+    # No parent - root device
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1001"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x5201"
+    device_class: "0x060400"
+  - id: "nic4-pf" # NIC4 PF
+    pci_address: "0000:44:00.0"
+    parent_address: "0000:83:00.0"
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1002"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x5201"
+    device_class: "0x020000"
+    driver: "ionic"
+
+drivers:
+  - name: "ionic"
+    version: "1.51.0-k"

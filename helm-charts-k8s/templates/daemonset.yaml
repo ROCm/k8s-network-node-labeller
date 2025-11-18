@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Release.Name }}-node-labeller
+  labels:
+  {{- include "helm-charts-network-nl.labels" . | nindent 4 }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  updateStrategy:
+    {{- toYaml .Values.updateStrategy | nindent 4 }}
+  selector:
+    matchLabels:
+      app: amd-network-node-labeller
+  template:
+    metadata:
+      labels:
+        app: amd-network-node-labeller
+    spec:
+      hostNetwork: true
+      serviceAccountName: {{ .Values.serviceAccountName | default (printf "%s-node-labeller" .Release.Name) }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - |
+          while [ ! -d /sys/class/infiniband ] || \
+                [ ! -d /sys/class/infiniband_verbs ] || \
+                [ ! -d /sys/module/ionic/drivers ]; do
+            echo "amd ionic driver is not loaded";
+            sleep 2;
+          done
+        image: busybox:1.36
+        imagePullPolicy: IfNotPresent
+        name: driver-init
+      containers:
+      - name: labeller
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        {{- with .Values.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: dev-volume
+          mountPath: /dev
+        - name: sys-volume
+          mountPath: /sys
+        - name: opt-amd
+          mountPath: /opt/amd
+        - name: nicctl
+          mountPath: /usr/sbin/nicctl
+        - name: lib-modules
+          mountPath: /lib/modules
+          readOnly: true
+        env:
+        - name: DS_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+      volumes:
+      - name: dev-volume
+        hostPath:
+          path: /dev
+          type: Directory
+      - name: sys-volume
+        hostPath:
+          path: /sys
+          type: Directory
+      - name: opt-amd
+        hostPath:
+          path: /opt/amd
+          type: DirectoryOrCreate
+      - name: nicctl
+        hostPath:
+          path: /usr/sbin/nicctl
+          type: FileOrCreate
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+          type: Directory

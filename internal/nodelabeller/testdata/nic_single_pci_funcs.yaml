@@ -1,0 +1,40 @@
+devices:
+  - id: "virtual-downstream-port"
+    pci_address: "0000:00:02.0"
+    # No parent - root device
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1001"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x2015"
+    device_class: "0x060400"
+  - id: "pf-1" # PF-1
+    pci_address: "0000:00:03.0"
+    parent_address: "0000:00:02.0"
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1002"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x8201"
+    device_class: "0x020000"
+    driver: "ionic"
+  - id: "pf-2" # PF-2
+    pci_address: "0000:00:03.1"
+    parent_address: "0000:00:02.0"
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1002"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x8201"
+    device_class: "0x020000"
+    driver: "ionic"
+  - id: "vf-1" # VF-1 (child of PF-1)
+    pci_address: "0000:00:03.2"
+    parent_address: "0000:00:03.0"
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1003"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x8201"
+    device_class: "0x020000"
+    driver: "ionic"
+
+drivers:
+  - name: "ionic"
+    version: "2.1.0"

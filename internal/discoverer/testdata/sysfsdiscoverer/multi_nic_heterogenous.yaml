@@ -1,0 +1,44 @@
+devices:
+  # First NIC
+  - id: "nic1-virtual-downstream-port"
+    pci_address: "0000:13:00.0"
+    # No parent - root device
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1001"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x5201"
+    device_class: "0x060400"
+  - id: "nic1-pf" # NIC1 PF
+    pci_address: "0000:14:00.0"
+    parent_address: "0000:13:00.0"
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1002"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x5201"
+    device_class: "0x020000"
+    driver: "ionic"
+  
+  # Second NIC
+  - id: "nic2-virtual-downstream-port"
+    pci_address: "0000:83:00.0"
+    # No parent - root device
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1001"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x6201"
+    device_class: "0x060400"
+  - id: "nic2-pf" # NIC2 PF
+    pci_address: "0000:44:00.0"
+    parent_address: "0000:83:00.0"
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1002"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x6201"
+    device_class: "0x020000"
+    driver: "amd-rocks"
+
+drivers:
+  - name: "ionic"
+    version: "1.51.0-k"
+  - name: "amd-rocks"
+    version: "5.0.0"

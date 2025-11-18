@@ -1,0 +1,12 @@
+apiVersion: v2
+name: network-node-labeller-charts
+description: A Helm chart for AMD AINIC Node Labeller
+
+type: application
+version: v1.0.0
+appVersion: v1.0.0
+maintainers:
+- email: Shiv.Tyagi@amd.com
+  name: Shiv Tyagi
+- email: sajmera@amd.com
+  name: Shrey Ajmera
