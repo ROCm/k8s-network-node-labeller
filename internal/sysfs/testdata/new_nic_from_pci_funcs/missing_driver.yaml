@@ -1,0 +1,11 @@
+devices:
+  - id: "test-pci-device"
+    pci_address: "0000:05:00.0"
+    pci_vendor_id: "0x1dd8"
+    pci_device_id: "0x1004"
+    subsystem_vendor_id: "0x1dd8"
+    subsystem_device_id: "0x5201"
+    device_class: "0x020000"
+    # No driver specified - will create device without driver symlink
+
+drivers: []

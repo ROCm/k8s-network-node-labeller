@@ -1,0 +1,15 @@
+nics:
+  - id: "nic1"
+    product_name: "Test NIC 1"
+    sku: "DSS-W600"
+    firmware_version: "1.2.3"
+    port:
+      - spec:
+          id: "port1"
+          name: "eth0"
+          port_type: "ETH"
+          port_speed: "100G"
+        status:
+          physical_port: "phys1"
+          operational_status: "up"
+driver_version: "2.1.0"

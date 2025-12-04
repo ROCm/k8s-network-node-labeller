@@ -1,0 +1,47 @@
+# -- Container image configuration
+image:
+  # -- Container image repository
+  repository: docker.io/rocm/k8s-network-node-labeller
+  # -- Container image tag
+  tag: v1.0.0
+  # -- Container image pull policy
+  pullPolicy: IfNotPresent
+
+# -- Service account name to use. If not set, defaults to Release name
+serviceAccountName: ""
+
+# -- Additional annotations to add to the DaemonSet pods
+annotations: {}
+
+# -- Security context for the DaemonSet pods
+securityContext:
+  # -- Run containers in privileged mode (required for accessing host network interfaces)
+  privileged: true
+
+# -- Resource limits and requests for the containers
+resources: {}
+  # limits:
+  #   memory: 20Mi
+  #   cpu: 100m
+  # requests:
+  #   memory: 30Mi
+  #   cpu: 150m
+
+# -- Update strategy for the DaemonSet
+updateStrategy:
+  # -- Type of update strategy (RollingUpdate or OnDelete)
+  type: RollingUpdate
+  rollingUpdate:
+    # -- Maximum number of pods that can be unavailable during update
+    maxUnavailable: 1
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# -- Node selector to constrain pods to specific nodes
+nodeSelector: {}
+
+# -- Tolerations for pod assignment to nodes with taints
+tolerations:
+  - key: CriticalAddonsOnly
+    operator: Exists

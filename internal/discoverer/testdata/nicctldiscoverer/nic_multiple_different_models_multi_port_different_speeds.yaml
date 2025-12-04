@@ -1,0 +1,44 @@
+nics:
+  - id: "nic1"
+    product_name: "Test NIC 1"
+    sku: "DSS-W650"
+    firmware_version: "1.2.3"
+    port:
+      - spec:
+          id: "port1"
+          name: "eth0"
+          port_type: "ETH"
+          port_speed: "100G"
+        status:
+          physical_port: "phys1"
+          operational_status: "up"
+      - spec:
+          id: "port2"
+          name: "eth1"
+          port_type: "ETH"
+          port_speed: "400G"
+        status:
+          physical_port: "phys2"
+          operational_status: "up"
+  - id: "nic2"
+    product_name: "Test NIC 2"
+    sku: "DSS-W450"
+    firmware_version: "1.3.4"
+    port:
+      - spec:
+          id: "port1"
+          name: "eth0"
+          port_type: "ETH"
+          port_speed: "25G"
+        status:
+          physical_port: "phys1"
+          operational_status: "up"
+      - spec:
+          id: "port2"
+          name: "eth1"
+          port_type: "ETH"
+          port_speed: "25G"
+        status:
+          physical_port: "phys2"
+          operational_status: "up"
+driver_version: "2.1.0"
