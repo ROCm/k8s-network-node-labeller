@@ -24,6 +24,8 @@ HELM_CHART_NAME ?= network-node-labeller-charts
 HELM_RELEASE_NAME ?= amd-network-node-labeller
 HELM_RELEASE_NAMESPACE ?= kube-amd-network
 
+AINIC_VERSION ?= 1.117.5-a-56
+DOCKER_ARGS ?= AINIC_VERSION=$(AINIC_VERSION)
 
 GO_BUILD_OPTS ?=
 
@@ -48,11 +50,9 @@ create-dirs:
 
 .PHONY: docker-build
 docker-build:
-ifeq ($(HOURLY_TAG_LABEL),)
-	docker build -t ${IMG} .
-else
-	docker build --label HOURLY_TAG_LABEL=$(HOURLY_TAG_LABEL) -t ${IMG} .
-endif
+	$(eval DOCKER_LABELS_OPTION := $(if $(DOCKER_LABELS),--label "$(DOCKER_LABELS)"))
+	$(eval DOCKER_ARGS_OPTION := $(if $(DOCKER_ARGS),--build-arg "$(DOCKER_ARGS)"))
+	docker build $(DOCKER_LABELS_OPTION) $(DOCKER_ARGS_OPTION) -t ${IMG} .
 
 .PHONY: docker-save
 docker-save: create-dirs
