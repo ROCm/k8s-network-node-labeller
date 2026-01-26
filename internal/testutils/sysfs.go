@@ -296,8 +296,8 @@ func sortDevicesByHierarchy(devices []TestPCIDevice) []TestPCIDevice {
 	return sorted
 }
 
-// printDirectoryTree prints the directory structure recursively without following symlinks
-func printDirectoryTree(dirPath string, prefix string) error {
+// PrintDirectoryTree prints the directory structure recursively without following symlinks
+func PrintDirectoryTree(dirPath string, prefix string) error {
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
 		return err
@@ -336,7 +336,7 @@ func printDirectoryTree(dirPath string, prefix string) error {
 		} else if info.IsDir() {
 			// It's a directory - print and recurse
 			fmt.Printf("%s%s/\n", currentPrefix, entry.Name())
-			if err := printDirectoryTree(fullPath, nextPrefix); err != nil {
+			if err := PrintDirectoryTree(fullPath, nextPrefix); err != nil {
 				fmt.Printf("%s(error reading subdirectory: %v)\n", nextPrefix, err)
 			}
 		} else {
