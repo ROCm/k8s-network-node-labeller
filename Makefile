@@ -94,6 +94,14 @@ helm-update-meta:
 helm-lint:
 	cd $(HELM_CHART_DIR); helm lint
 
+.PHONY: lint
+lint:
+	@[ -f $(PROJECT_DIR)/bin/golangci-lint ] || { \
+		echo "Installing golangci-lint to $(PROJECT_DIR)/bin..." ;\
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(PROJECT_DIR)/bin v2.7.2 ;\
+	}
+	$(PROJECT_DIR)/bin/golangci-lint run ./...
+
 HELMDOCS = $(shell pwd)/bin/helm-docs
 .PHONY: helm-docs
 helm-docs: ## Download helm-docs locally if necessary
