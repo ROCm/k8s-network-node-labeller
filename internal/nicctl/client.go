@@ -78,7 +78,7 @@ type NicctlCommandClient struct {
 // NewNicctlCommandClient creates a new NicctlCommandClient
 func NewNicctlCommandClient(binaryPath string) (*NicctlCommandClient, error) {
 	if err := validateBinary(binaryPath); err != nil {
-		return nil, fmt.Errorf("Invalid nicctl binary: %s", err)
+		return nil, fmt.Errorf("invalid nicctl binary: %s", err)
 	}
 
 	return &NicctlCommandClient{

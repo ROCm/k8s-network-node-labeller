@@ -169,7 +169,7 @@ func (c *SysfsClient) collectAmdNicPciFuncs() ([]PCIDevice, error) {
 	var allDevices []PCIDevice
 
 	// Iterate through each NICs of interest
-	for subsystemID, _ := range c.productInfoMap {
+	for subsystemID := range c.productInfoMap {
 		filter := PCIDevice{
 			PCIVendorID:       "1dd8",      // AMD Pensando
 			SubsystemDeviceID: subsystemID, // Use the PCI ID from the map

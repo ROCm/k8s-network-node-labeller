@@ -17,6 +17,7 @@ limitations under the License.
 package label
 
 import (
+	"context"
 	"log/slog"
 	"regexp"
 	"strings"
@@ -52,12 +53,12 @@ func HashLabels(labels []Label) string {
 // PrintLabels prints the given labels in a structured format at the specified log level
 func PrintLabels(labels []Label, level slog.Level) {
 	if len(labels) == 0 {
-		slog.Log(nil, level, "No labels to print")
+		slog.Log(context.Background(), level, "No labels to print")
 		return
 	}
 
 	for _, l := range labels {
-		slog.Log(nil, level, "Label", "key", l.Key, "value", l.Value)
+		slog.Log(context.Background(), level, "Label", "key", l.Key, "value", l.Value)
 	}
 }
 
