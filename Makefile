@@ -92,7 +92,7 @@ helm-update-meta:
 
 .PHONY: helm-lint
 helm-lint:
-	cd $(HELM_CHART_DIR); helm lint
+	helm lint $(HELM_CHART_DIR)
 
 .PHONY: lint
 lint:
