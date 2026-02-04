@@ -29,6 +29,15 @@ DOCKER_ARGS ?= AINIC_VERSION=$(AINIC_VERSION)
 
 GO_BUILD_OPTS ?=
 
+# Build environment container variables
+DOCKER_BUILDER_IMAGE_NAME ?= k8s-network-node-labeller-build
+DOCKER_BUILDER_IMAGE_NAME_BASE ?= $(DOCKER_REGISTRY)/$(DOCKER_BUILDER_IMAGE_NAME)
+DOCKER_BUILDER_IMAGE_TAG ?= v1.0
+DOCKER_BUILDER_IMAGE ?= $(DOCKER_BUILDER_IMAGE_NAME_BASE):$(DOCKER_BUILDER_IMAGE_TAG)
+CONTAINER_WORKDIR ?= /k8s-network-node-labeller
+CUR_USER:=$(shell whoami)
+CONTAINER_NAME:=${CUR_USER}-k8s-network-node-labeller-build
+
 # go-get-tool will 'go install' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
@@ -62,6 +71,27 @@ docker-save: create-dirs
 .PHONY: docker-push
 docker-push:
 	docker push ${IMG}
+
+.PHONY: docker-build-env
+docker-build-env: ## Build the build environment container
+	$(info Building build environment container $(DOCKER_BUILDER_IMAGE)...)
+	docker build -t $(DOCKER_BUILDER_IMAGE) -f tools/base-image/Dockerfile tools/base-image/
+	$(info Done!)
+
+.PHONY: docker-shell
+docker-shell: docker-build-env ## Start a shell in the Docker build container
+	@echo "Starting a shell in the Docker build container..."
+	@docker run --rm -it --privileged \
+		--name ${CONTAINER_NAME} \
+		-e "USER_NAME=${CUR_USER}" \
+		-e "USER_UID=$(shell id -u)" \
+		-e "USER_GID=$(shell id -g)" \
+		-v $(CURDIR):$(CONTAINER_WORKDIR) \
+		-v $(CURDIR):/home/${CUR_USER}/go/src/github.com/ROCm/k8s-network-node-labeller \
+		-v $(HOME)/.ssh:/home/${CUR_USER}/.ssh \
+		-w $(CONTAINER_WORKDIR) \
+		$(DOCKER_BUILDER_IMAGE) \
+		'bash -ic "source ~/.bash_profile && cd $(CONTAINER_WORKDIR) && git config --global --add safe.directory $(CONTAINER_WORKDIR) && bash"'
 
 .PHONY: build
 build: create-dirs
