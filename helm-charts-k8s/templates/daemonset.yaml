@@ -64,8 +64,6 @@ spec:
           mountPath: /sys
         - name: opt-amd
           mountPath: /opt/amd
-        - name: nicctl
-          mountPath: /usr/sbin/nicctl
         - name: lib-modules
           mountPath: /lib/modules
           readOnly: true
@@ -87,10 +85,6 @@ spec:
         hostPath:
           path: /opt/amd
           type: DirectoryOrCreate
-      - name: nicctl
-        hostPath:
-          path: /usr/sbin/nicctl
-          type: FileOrCreate
       - name: lib-modules
         hostPath:
           path: /lib/modules
