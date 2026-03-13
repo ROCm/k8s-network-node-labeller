@@ -18,6 +18,15 @@ Please refer to this [example manifest file](./examples/k8s-network-node-labelle
 
 The Labeller must be run on all nodes equipped with AMD AINICs. The simplest way to do this is to create a Kubernetes DaemonSet, which runs a copy of the pod on all (or some) nodes in the cluster. An example configuration is available [here](./examples/k8s-network-node-labeller-ds.yaml). This labeller requires privileged mode for NIC feature discovery. It is recommended to consult with your cluster administrator or security expert to ensure appropriate security measures are in place.
 
+## Compatibility Matrix
+
+The following matrix summarizes supported NICs and the required AINIC firmware / tooling for each container image version.
+
+| AINIC Firmware Version | Image Version | Supported NICs |
+| --- | --- | --- |
+| N/A (host `nicctl`) | `v1.0.0` | Pollara 400 |
+| `1.117.5-a-56` | `v1.1.0` | Pollara 400 |
+
 ## Labels
 The Labeller currently creates node labels for the following AMD AINIC properties:
 
