@@ -23,6 +23,9 @@ HELM_CHART_APP_VERSION ?= $(IMAGE_TAG)
 HELM_CHART_NAME ?= network-node-labeller-charts
 HELM_RELEASE_NAME ?= amd-network-node-labeller
 HELM_RELEASE_NAMESPACE ?= kube-amd-network
+HELM_OUTPUT_FILE_PREFIX ?= k8s-network-node-labeller-helm-k8s
+HELM_OUTPUT_FILE_NAME ?= $(HELM_OUTPUT_FILE_PREFIX)-$(PROJECT_VERSION).tgz
+CHART_DEST ?= $(HELM_CHART_DIR)/$(HELM_OUTPUT_FILE_NAME)
 
 AINIC_VERSION ?= 1.117.5-a-56
 DOCKER_ARGS ?= AINIC_VERSION=$(AINIC_VERSION)
@@ -138,14 +141,16 @@ helm-docs: ## Download helm-docs locally if necessary
 	$(call go-get-tool,$(HELMDOCS),github.com/norwoodj/helm-docs/cmd/helm-docs@v1.12.0)
 	$(HELMDOCS) -c $(shell pwd)/helm-charts-k8s/ -g $(shell pwd)/helm-charts-k8s -u --ignore-non-descriptions
 
+.PHONY: cleanup-stale-charts
+cleanup-stale-charts:
+	rm -f $(HELM_CHART_DIR)/$(HELM_CHART_NAME)-*.tgz $(HELM_CHART_DIR)/$(HELM_OUTPUT_FILE_PREFIX)-*.tgz
+
 .PHONY: helm-package
-helm-package:
+helm-package: cleanup-stale-charts
 	helm package $(HELM_CHART_DIR)/ --destination $(HELM_CHART_DIR)
 
 .PHONY: helm
 helm: helm-update-meta helm-lint helm-package helm-docs
-	$(eval HELM_OUTPUT_FILE_NAME ?= k8s-network-node-labeller-helm-k8s-$(PROJECT_VERSION).tgz)
-	$(eval CHART_DEST := $(HELM_CHART_DIR)/$(HELM_OUTPUT_FILE_NAME))
 	cp $(HELM_CHART_DIR)/$(HELM_CHART_NAME)-$(HELM_CHART_VERSION).tgz $(CHART_DEST)
 	@echo "Helm chart is ready in $(CHART_DEST)"
 
