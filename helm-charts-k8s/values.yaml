@@ -15,7 +15,7 @@ annotations: {}
 
 # -- Security context for the DaemonSet pods
 securityContext:
-  # -- Run containers in privileged mode (required for accessing host network interfaces)
+  # -- Run containers in privileged mode (required by nicctl)
   privileged: true
 
 # -- Resource limits and requests for the containers

@@ -19,7 +19,6 @@ spec:
       labels:
         app: amd-network-node-labeller
     spec:
-      hostNetwork: true
       serviceAccountName: {{ .Values.serviceAccountName | default (printf "%s-node-labeller" .Release.Name) }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
