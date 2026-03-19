@@ -45,3 +45,8 @@ nodeSelector: {}
 tolerations:
   - key: CriticalAddonsOnly
     operator: Exists
+
+# -- Hook configuration
+hooks:
+  # -- Image used by pre-delete hook to gracefully shut down labeller pods
+  utilsImage: docker.io/rocm/network-operator-utils:v1.1.0

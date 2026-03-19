@@ -16,6 +16,8 @@ A Helm chart for AMD AINIC Node Labeller
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | annotations | object | `{}` | Additional annotations to add to the DaemonSet pods |
+| hooks | object | `{"utilsImage":"docker.io/rocm/network-operator-utils:v1.1.0"}` | Hook configuration |
+| hooks.utilsImage | string | `"docker.io/rocm/network-operator-utils:v1.1.0"` | Image used by pre-delete hook to gracefully shut down labeller pods |
 | image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/rocm/k8s-network-node-labeller","tag":"v1.0.0"}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Container image pull policy |
 | image.repository | string | `"docker.io/rocm/k8s-network-node-labeller"` | Container image repository |
