@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-node-labeller-pre-delete
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "helm-charts-network-nl.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-delete
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-node-labeller-pre-delete
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "helm-charts-network-nl.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-delete
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  verbs:
+  - get
+  - list
+  - watch
+  - delete
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-node-labeller-pre-delete
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "helm-charts-network-nl.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-delete
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Release.Name }}-node-labeller-pre-delete
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-node-labeller-pre-delete
+  namespace: {{ .Release.Namespace }}
+
+---
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-node-labeller-pre-delete
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "helm-charts-network-nl.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-delete
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  activeDeadlineSeconds: 60
+  template:
+    metadata:
+      labels:
+      {{- include "helm-charts-network-nl.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-node-labeller-pre-delete
+      restartPolicy: OnFailure
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: pre-delete
+        image: {{ .Values.hooks.utilsImage }}
+        command:
+        - kubectl
+        - delete
+        - daemonset
+        - {{ .Release.Name }}-node-labeller
+        - --namespace
+        - {{ .Release.Namespace }}
+        - --cascade=foreground
+        - --ignore-not-found
+        - --wait
