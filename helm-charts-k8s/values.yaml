@@ -3,7 +3,7 @@ image:
   # -- Container image repository
   repository: docker.io/rocm/k8s-network-node-labeller
   # -- Container image tag
-  tag: v1.0.0
+  tag: v1.1.0
   # -- Container image pull policy
   pullPolicy: IfNotPresent
 
