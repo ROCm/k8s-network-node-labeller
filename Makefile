@@ -3,7 +3,7 @@ ifneq ("$(wildcard dev.env)","")
     include dev.env
 endif
 
-PROJECT_VERSION ?= v1.0.0
+PROJECT_VERSION ?= v1.1.0
 
 DOCKER_REGISTRY ?= docker.io/rocm
 IMAGE_NAME ?= k8s-network-node-labeller

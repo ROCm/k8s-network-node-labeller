@@ -41,7 +41,7 @@ spec:
       serviceAccountName: network-node-labeller
       containers:
       - name: network-node-labeller
-        image: docker.io/rocm/k8s-network-node-labeller:v1.0.0
+        image: docker.io/rocm/k8s-network-node-labeller:v1.1.0
         imagePullPolicy: Always
         securityContext:
           privileged: true
