@@ -78,7 +78,11 @@ type NicctlCommandClient struct {
 // NewNicctlCommandClient creates a new NicctlCommandClient
 func NewNicctlCommandClient(binaryPath string) (*NicctlCommandClient, error) {
 	if err := validateBinary(binaryPath); err != nil {
-		return nil, fmt.Errorf("invalid nicctl binary: %s", err)
+		return nil, fmt.Errorf("invalid nicctl binary: %w", err)
+	}
+
+	if err := validateCardList(binaryPath); err != nil {
+		return nil, fmt.Errorf("failed to validate card list (hint: is the container running in privileged mode?): %w", err)
 	}
 
 	return &NicctlCommandClient{
@@ -106,17 +110,20 @@ func validateBinary(binaryPath string) error {
 		return fmt.Errorf("nicctl binary at %s is not executable", binaryPath)
 	}
 
-	// Check if nicctl show card -j gives an output, to make sure it is the right binary
+	return nil
+}
+
+// validateCardList checks if nicctl can list cards and produce valid JSON output
+func validateCardList(binaryPath string) error {
 	cmd := exec.Command(binaryPath, "show", "card", "-j")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("nicctl found but seems non-functional: Failed to execute nicctl binary at %s: %w\nOutput: %s", binaryPath, err, output)
+		return fmt.Errorf("failed to execute nicctl command %s: %w\nOutput: %s", cmd.String(), err, string(output))
 	}
 
-	// Try to parse the output as JSON to ensure it's valid
 	var testResponse NICResponse
 	if err := json.Unmarshal(output, &testResponse); err != nil {
-		return fmt.Errorf("nicctl found but seems non-functional: nicctl binary at %s does not produce valid JSON output: %w\nOutput: %s", binaryPath, err, output)
+		return fmt.Errorf("nicctl command %s does not produce valid JSON output: %w\nOutput: %s", cmd.String(), err, string(output))
 	}
 
 	return nil

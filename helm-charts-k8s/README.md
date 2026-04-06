@@ -26,7 +26,7 @@ A Helm chart for AMD AINIC Node Labeller
 | nodeSelector | object | `{}` | Node selector to constrain pods to specific nodes |
 | resources | object | `{}` | Resource limits and requests for the containers |
 | securityContext | object | `{"privileged":true}` | Security context for the DaemonSet pods |
-| securityContext.privileged | bool | `true` | Run containers in privileged mode (required by nicctl) |
+| securityContext.privileged | bool | `true` | Run containers in privileged mode. nicctl requires the container to run in privileged mode to detect AINICs. It is recommended to set this to true for bare metal nodes. For VM nodes, nicctl is not used and this can be set to false. |
 | serviceAccountName | string | `""` | Service account name to use. If not set, defaults to Release name |
 | tolerations | list | `[{"key":"CriticalAddonsOnly","operator":"Exists"}]` | Tolerations for pod assignment to nodes with taints |
 | updateStrategy | object | `{"rollingUpdate":{"maxUnavailable":1},"type":"RollingUpdate"}` | Update strategy for the DaemonSet |

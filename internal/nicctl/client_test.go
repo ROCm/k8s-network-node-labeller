@@ -45,45 +45,10 @@ func TestValidateBinary(t *testing.T) {
 		t.Fatalf("Failed to create directory: %v", err)
 	}
 
-	// Executable binary that fails on any command
-	failingBinaryPath := filepath.Join(tempDir, "failing_binary")
-	failingBinaryContent := `#!/bin/sh
-echo "Oops! :_)" >&2
-exit 1
-`
-	err = os.WriteFile(failingBinaryPath, []byte(failingBinaryContent), 0755)
+	validExecutablePath := filepath.Join(tempDir, "valid_executable")
+	err = os.WriteFile(validExecutablePath, []byte("#!/bin/sh\nexit 0\n"), 0755)
 	if err != nil {
-		t.Fatalf("Failed to create failing binary: %v", err)
-	}
-
-	// Executable binary that returns invalid JSON on show cards -j command
-	invalidJsonBinaryPath := filepath.Join(tempDir, "invalid_json_binary")
-	invalidJsonBinaryContent := `#!/bin/bash
-if [ "$1" == "show" ] && [ "$2" == "cards" ] && [ "$3" == "-j" ]; then
-	echo "{invalid json here"
-	exit 0
-else
-	exit 1
-fi
-`
-	err = os.WriteFile(invalidJsonBinaryPath, []byte(invalidJsonBinaryContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to create invalid JSON binary: %v", err)
-	}
-
-	// Valid executable binary
-	validBinaryPath := filepath.Join(tempDir, "valid_binary")
-	validBinaryContent := `#!/bin/bash
-if [ "$1" == "show" ] && [ "$2" == "card" ] && [ "$3" == "-j" ]; then
-	echo "{\"nics\": []}"
-	exit 0
-else
-	exit 1
-fi
-`
-	err = os.WriteFile(validBinaryPath, []byte(validBinaryContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to create valid binary: %v", err)
+		t.Fatalf("Failed to create valid executable: %v", err)
 	}
 
 	type testCase struct {
@@ -113,16 +78,93 @@ fi
 			errorMessage: "is not a regular file",
 		},
 		{
+			name:       "valid executable binary",
+			binaryPath: validExecutablePath,
+			wantErr:    false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := validateBinary(tc.binaryPath)
+
+			if tc.wantErr {
+				if err == nil {
+					t.Fatalf("Expected error for test case '%s', but got nil", tc.name)
+				}
+
+				if !strings.Contains(err.Error(), tc.errorMessage) {
+					t.Errorf("Expected error message to contain '%s', but got: %s", tc.errorMessage, err.Error())
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Expected no error for test case '%s', but got: %v", tc.name, err)
+				}
+			}
+		})
+	}
+}
+
+func TestValidateCardList(t *testing.T) {
+	tempDir := t.TempDir()
+
+	failingBinaryPath := filepath.Join(tempDir, "failing_binary")
+	failingBinaryContent := `#!/bin/sh
+echo "Oops! :_)" >&2
+exit 1
+`
+	err := os.WriteFile(failingBinaryPath, []byte(failingBinaryContent), 0755)
+	if err != nil {
+		t.Fatalf("Failed to create failing binary: %v", err)
+	}
+
+	invalidJsonBinaryPath := filepath.Join(tempDir, "invalid_json_binary")
+	invalidJsonBinaryContent := `#!/bin/bash
+if [ "$1" == "show" ] && [ "$2" == "card" ] && [ "$3" == "-j" ]; then
+	echo "{invalid json here"
+	exit 0
+else
+	exit 1
+fi
+`
+	err = os.WriteFile(invalidJsonBinaryPath, []byte(invalidJsonBinaryContent), 0755)
+	if err != nil {
+		t.Fatalf("Failed to create invalid JSON binary: %v", err)
+	}
+
+	validBinaryPath := filepath.Join(tempDir, "valid_binary")
+	validBinaryContent := `#!/bin/bash
+if [ "$1" == "show" ] && [ "$2" == "card" ] && [ "$3" == "-j" ]; then
+	echo "{\"nics\": []}"
+	exit 0
+else
+	exit 1
+fi
+`
+	err = os.WriteFile(validBinaryPath, []byte(validBinaryContent), 0755)
+	if err != nil {
+		t.Fatalf("Failed to create valid binary: %v", err)
+	}
+
+	type testCase struct {
+		name         string
+		binaryPath   string
+		wantErr      bool
+		errorMessage string
+	}
+
+	testCases := []testCase{
+		{
 			name:         "executable binary with failing show cards command",
 			binaryPath:   failingBinaryPath,
 			wantErr:      true,
-			errorMessage: "nicctl found but seems non-functional",
+			errorMessage: "failed to execute nicctl command",
 		},
 		{
 			name:         "executable binary with invalid json on show cards command",
 			binaryPath:   invalidJsonBinaryPath,
 			wantErr:      true,
-			errorMessage: "nicctl found but seems non-functional",
+			errorMessage: "does not produce valid JSON output",
 		},
 		{
 			name:       "valid executable binary",
@@ -133,10 +175,8 @@ fi
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Execute the function under test with the specified binary path
-			err := validateBinary(tc.binaryPath)
+			err := validateCardList(tc.binaryPath)
 
-			// Verify the results
 			if tc.wantErr {
 				if err == nil {
 					t.Fatalf("Expected error for test case '%s', but got nil", tc.name)
