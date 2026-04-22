@@ -1,6 +1,6 @@
 # network-node-labeller-charts
 
-![Version: v1.1.0](https://img.shields.io/badge/Version-v1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.1.0](https://img.shields.io/badge/AppVersion-v1.1.0-informational?style=flat-square)
+![Version: v1.2.0](https://img.shields.io/badge/Version-v1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.2.0](https://img.shields.io/badge/AppVersion-v1.2.0-informational?style=flat-square)
 
 A Helm chart for AMD AINIC Node Labeller
 
@@ -18,10 +18,10 @@ A Helm chart for AMD AINIC Node Labeller
 | annotations | object | `{}` | Additional annotations to add to the DaemonSet pods |
 | hooks | object | `{"utilsImage":"docker.io/rocm/network-operator-utils:v1.1.0"}` | Hook configuration |
 | hooks.utilsImage | string | `"docker.io/rocm/network-operator-utils:v1.1.0"` | Image used by pre-delete hook to gracefully shut down labeller pods |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/rocm/k8s-network-node-labeller","tag":"v1.1.0"}` | Container image configuration |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/rocm/k8s-network-node-labeller","tag":"v1.2.0"}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Container image pull policy |
 | image.repository | string | `"docker.io/rocm/k8s-network-node-labeller"` | Container image repository |
-| image.tag | string | `"v1.1.0"` | Container image tag |
+| image.tag | string | `"v1.2.0"` | Container image tag |
 | imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | nodeSelector | object | `{}` | Node selector to constrain pods to specific nodes |
 | resources | object | `{}` | Resource limits and requests for the containers |
