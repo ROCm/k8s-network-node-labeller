@@ -22,10 +22,11 @@ The Labeller must be run on all nodes equipped with AMD AINICs. The simplest way
 
 The following matrix summarizes supported NICs and the required AINIC firmware / tooling for each container image version.
 
-| AINIC Firmware Version | Image Version | Supported NICs |
+| Image Version | AINIC Firmware Version | Supported NICs |
 | --- | --- | --- |
-| N/A (host `nicctl`) | `v1.0.0` | Pollara 400 |
-| `1.117.5-a-56` | `v1.1.0` | Pollara 400 |
+| `v1.0.0` | N/A (host `nicctl`) | Pollara 400 |
+| `v1.1.0` | `1.117.5-a-56` | Pollara 400 |
+| `v1.2.0` | `1.117.5-a-56`<br>`1.117.5-a-77` | Pollara 400 |
 
 ## Labels
 The Labeller currently creates node labels for the following AMD AINIC properties:
