@@ -1,3 +1,8 @@
 build/*
 helm-charts-k8s/*.tgz
 /bin/
+
+# Sphinx documentation
+docs/_build/
+docs/venv/
+**/__pycache__/
