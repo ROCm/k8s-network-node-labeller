@@ -1,0 +1,2 @@
+images:
+  - target: docker.io/rocm/k8s-network-node-labeller:v1.2.0

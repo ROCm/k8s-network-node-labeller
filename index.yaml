@@ -1,0 +1,19 @@
+apiVersion: v1
+entries:
+  network-node-labeller-charts:
+  - apiVersion: v2
+    appVersion: v1.2.0
+    created: "2026-04-28T00:20:20.82232369Z"
+    description: A Helm chart for AMD AINIC Node Labeller
+    digest: 56ccb66d87d922c6c4f2aca5bcc66145a65fed3f67ac80b2349eacf9c2d186a5
+    maintainers:
+    - email: Shiv.Tyagi@amd.com
+      name: Shiv Tyagi
+    - email: sajmera@amd.com
+      name: Shrey Ajmera
+    name: network-node-labeller-charts
+    type: application
+    urls:
+    - https://rocm.github.io/k8s-network-node-labeller/charts/k8s-network-node-labeller-charts-v1.2.0.tgz
+    version: v1.2.0
+generated: "2026-04-28T00:20:20.821524557Z"
