@@ -18,6 +18,21 @@ Please refer to this [example manifest file](./examples/k8s-network-node-labelle
 
 The Labeller must be run on all nodes equipped with AMD AINICs. The simplest way to do this is to create a Kubernetes DaemonSet, which runs a copy of the pod on all (or some) nodes in the cluster. An example configuration is available [here](./examples/k8s-network-node-labeller-ds.yaml). This labeller requires privileged mode for NIC feature discovery. It is recommended to consult with your cluster administrator or security expert to ensure appropriate security measures are in place.
 
+### Using Helm
+
+You can also deploy the node labeller using Helm. Add the AMD Helm repository and install the chart:
+
+```bash
+helm repo add rocm-network-nl https://rocm.github.io/k8s-network-node-labeller
+helm repo update
+helm install amd-network-node-labeller rocm-network-nl/network-node-labeller-charts \
+  --namespace kube-amd-network \
+  --create-namespace \
+  --version v1.2.0
+```
+
+For detailed installation instructions and configuration options, refer to the [Helm Installation Guide](./docs/installation/kubernetes-helm.md).
+
 ## Compatibility Matrix
 
 The following matrix summarizes supported NICs and the required AINIC firmware / tooling for each container image version.
