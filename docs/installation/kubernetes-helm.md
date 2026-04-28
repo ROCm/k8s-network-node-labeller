@@ -12,16 +12,20 @@ This page explains how to install AMD Kubernetes Network Node Labeller using Hel
 
 ## Installation
 
-### Download the chart archive
+### Add the AMD Helm Repository
 
-Download the Network Node Labeller Helm chart archive from the release artifacts.
+```bash
+helm repo add rocm-network-nl https://rocm.github.io/k8s-network-node-labeller
+helm repo update
+```
 
 ### Install the Helm chart
 
 ```bash
-helm install amd-network-node-labeller <path-to-chart-archive>.tgz \
+helm install amd-network-node-labeller rocm-network-nl/network-node-labeller-charts \
   --namespace kube-amd-network \
-  --create-namespace
+  --create-namespace \
+  --version v1.2.0
 ```
 
 ### Verify the installation
@@ -55,9 +59,10 @@ To override default values, pass `--set key=value` on the command line or supply
 To schedule the labeller DaemonSet pods on nodes with a custom taint, add the required toleration:
 
 ```bash
-helm install amd-network-node-labeller <path-to-chart-archive>.tgz \
+helm install amd-network-node-labeller rocm-network-nl/network-node-labeller-charts \
   --namespace kube-amd-network \
   --create-namespace \
+  --version v1.2.0 \
   --set tolerations[0].key=example.com/foo \
   --set tolerations[0].operator=Exists \
   --set tolerations[0].effect=NoSchedule
@@ -73,9 +78,10 @@ tolerations:
 ```
 
 ```bash
-helm install amd-network-node-labeller <path-to-chart-archive>.tgz \
+helm install amd-network-node-labeller rocm-network-nl/network-node-labeller-charts \
   --namespace kube-amd-network \
   --create-namespace \
+  --version v1.2.0 \
   -f my-values.yaml
 ```
 
@@ -84,7 +90,8 @@ helm install amd-network-node-labeller <path-to-chart-archive>.tgz \
 Use the `--debug` flag with `helm install` or `helm template` to see the fully rendered Kubernetes manifests with all values applied. This is useful for verifying that overrides are taking effect before deploying:
 
 ```bash
-helm template amd-network-node-labeller <path-to-chart-archive>.tgz \
+helm template amd-network-node-labeller rocm-network-nl/network-node-labeller-charts \
+  --version v1.2.0 \
   --debug \
   -f my-values.yaml
 ```
@@ -92,9 +99,10 @@ helm template amd-network-node-labeller <path-to-chart-archive>.tgz \
 Use `--dry-run` with `helm install` to simulate the installation without applying any resources to the cluster. Unlike `helm template`, a dry run communicates with the Kubernetes API server to validate the manifests against the cluster:
 
 ```bash
-helm install amd-network-node-labeller <path-to-chart-archive>.tgz \
+helm install amd-network-node-labeller rocm-network-nl/network-node-labeller-charts \
   --namespace kube-amd-network \
   --create-namespace \
+  --version v1.2.0 \
   --dry-run \
   -f my-values.yaml
 ```
