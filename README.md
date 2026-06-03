@@ -51,6 +51,7 @@ The Labeller currently creates node labels for the following AMD AINIC propertie
 * Port Count (-port-count)
 * Port Speed (-port-speed)
 * Firmware Version (-firmware-version)
+* Profile (-profile)
 * Driver Version (-driver-version)
 * Driver Name (-driver-name)
 
@@ -64,6 +65,7 @@ Example result:
                         amd.com/nic.port-count=2
                         amd.com/nic.port-speed=100G
                         amd.com/nic.firmware-version=1.117.1-a-7
+                        amd.com/nic.profile=pf1_vf1
                         amd.com/driver-name=ionic
                         amd.com/driver-version=25.06.4.001
                         beta.kubernetes.io/arch=amd64
@@ -73,7 +75,7 @@ Example result:
                         node.alpha.kubernetes.io/ttl: 0
     ......
 
-**Note:** When running on VMs, the labeller has limited access to hardware information and will only publish the following labels: Product Name, Driver Version, and Driver Name. Other hardware-specific properties like port count, port speed, and firmware version may not be available in virtualized environments.
+**Note:** When running on VMs, the labeller has limited access to hardware information and will only publish the following labels: Product Name, Driver Version, and Driver Name. Other hardware-specific properties like port count, port speed, firmware version, and profile may not be available in virtualized environments.
 
 #### Label Key Format for Homogeneous vs Heterogeneous Nodes
 
@@ -90,6 +92,8 @@ amd.com/nic.pollara-1q400p.count=1
 amd.com/nic.<some-other-nic>.count=1
 amd.com/nic.pollara-1q400p.product-name=POLLARA_1x400G_QSFP112
 amd.com/nic.<some-other-nic>.product-name=<some-other-nic-full-name>
+amd.com/nic.pollara-1q400p.profile=pf1_vf1
+amd.com/nic.<some-other-nic>.profile=hnic_pf1_vf8
 ...
 ```
 
@@ -98,6 +102,10 @@ amd.com/nic.<some-other-nic>.product-name=<some-other-nic-full-name>
 Once the Node Labeller is deployed and functional, you can select specific nodes via Kubernetes' label selector. For example, to select nodes that have NICs with 100G port speed attached:
 
     $ kubectl get nodes -l amd.com/nic.port-speed=100G
+
+To target nodes running a specific NIC profile (for example, when configuring SR-IOV):
+
+    $ kubectl get nodes -l amd.com/nic.profile=pf1_vf1
 
 ## Building From Source
 

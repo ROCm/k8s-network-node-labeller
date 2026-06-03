@@ -135,6 +135,7 @@ func TestNodeLabeller_IntegrationWithNicSingleYAML(t *testing.T) {
 		"amd.com/nic.count":            "1",
 		"amd.com/nic.product-name":     "Test_NIC_1",
 		"amd.com/nic.firmware-version": "1.2.3",
+		"amd.com/nic.profile":          "pf1_vf1",
 		"amd.com/nic.port-count":       "1",
 		"amd.com/nic.port-speed":       "100G",
 		"amd.com/nic.driver-version":   "2.1.0",

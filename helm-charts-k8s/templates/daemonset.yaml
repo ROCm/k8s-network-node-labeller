@@ -85,6 +85,9 @@ spec:
         - name: lib-modules
           mountPath: /lib/modules
           readOnly: true
+        - name: ainic-config
+          mountPath: /etc/amd/ainic
+          readOnly: true
         env:
         - name: DS_NODE_NAME
           valueFrom:
@@ -106,4 +109,8 @@ spec:
       - name: lib-modules
         hostPath:
           path: /lib/modules
+          type: Directory
+      - name: ainic-config
+        hostPath:
+          path: /etc/amd/ainic
           type: Directory

@@ -24,6 +24,7 @@ The labeller creates node labels for the following AMD AINIC properties:
 * **Firmware Version** (`-firmware-version`) - AINIC firmware version
 * **Driver Version** (`-driver-version`) - Driver version in use
 * **Driver Name** (`-driver-name`) - Driver name
+* **Profile** (`-profile`) - Active NIC card profile
 
 ### Label Format
 
@@ -34,6 +35,7 @@ amd.com/nic.product-name=POLLARA_1x400G_QSFP112
 amd.com/nic.port-count=2
 amd.com/nic.port-speed=100G
 amd.com/nic.firmware-version=1.117.1-a-7
+amd.com/nic.profile=pf1_vf1
 amd.com/driver-name=ionic
 amd.com/driver-version=25.06.4.001
 ```
@@ -63,7 +65,7 @@ The following matrix summarizes supported NICs and the required AINIC firmware /
 | `v1.1.0`      | `1.117.5-a-56`                   | Pollara 400    |
 | `v1.2.0`      | `1.117.5-a-56`<br>`1.117.5-a-77` | Pollara 400    |
 
-**Note:** When running on VMs, the labeller has limited access to hardware information and will only publish Product Name, Driver Version, and Driver Name labels. Hardware-specific properties like port count, port speed, and firmware version may not be available in virtualized environments.
+**Note:** When running on VMs, the labeller has limited access to hardware information and will only publish Product Name, Driver Version, and Driver Name labels. Hardware-specific properties like port count, port speed, firmware version, and profile may not be available in virtualized environments.
 
 ## Prerequisites
 
@@ -113,6 +115,9 @@ kubectl get nodes -l amd.com/nic.port-speed=100G
 
 # Select nodes with Pollara NICs
 kubectl get nodes -l amd.com/nic.product-name=POLLARA_1x400G_QSFP112
+
+# Select nodes with a specific NIC profile
+kubectl get nodes -l amd.com/nic.profile=pf1_vf1
 ```
 
 ### Pod Scheduling

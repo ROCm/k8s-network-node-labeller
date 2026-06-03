@@ -20,4 +20,6 @@ nics:
         status:
           physical_port: "phys2"
           operational_status: "up"
+profiles:
+  nic1: "pf1_vf1"
 driver_version: "2.1.0"

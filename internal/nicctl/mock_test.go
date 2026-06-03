@@ -20,6 +20,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -127,6 +128,86 @@ func TestMockNicctlClient_GetIonicDriverVersion_Custom(t *testing.T) {
 	}
 }
 
+func TestMockNicctlClient_GetCardProfiles(t *testing.T) {
+	profileError := errors.New("profile error")
+
+	tests := []struct {
+		name             string
+		setup            func(*MockNicctlClient)
+		wantErr          error
+		wantErrContains  string
+		expectedProfiles map[string]string
+	}{
+		{
+			name:             "default returns empty map",
+			setup:            func(m *MockNicctlClient) {},
+			expectedProfiles: map[string]string{},
+		},
+		{
+			name: "custom func override",
+			setup: func(m *MockNicctlClient) {
+				m.GetCardProfilesFunc = func() (map[string]string, error) {
+					return map[string]string{"nic1": "pf1_vf1"}, nil
+				}
+			},
+			expectedProfiles: map[string]string{"nic1": "pf1_vf1"},
+		},
+		{
+			name: "func override error",
+			setup: func(m *MockNicctlClient) {
+				m.GetCardProfilesFunc = func() (map[string]string, error) {
+					return nil, profileError
+				}
+			},
+			wantErr: profileError,
+		},
+		{
+			name: "yaml profile error trigger",
+			setup: func(m *MockNicctlClient) {
+				m.testData = &TestData{
+					Profiles: map[string]string{"nic1": ProfileErrorTrigger},
+				}
+			},
+			wantErrContains: "profile command failed",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := NewMockNicctlClient()
+			tt.setup(mock)
+
+			profiles, err := mock.GetCardProfiles()
+
+			if tt.wantErr != nil || tt.wantErrContains != "" {
+				if tt.wantErr != nil {
+					if err != tt.wantErr {
+						t.Errorf("Expected error '%v', got '%v'", tt.wantErr, err)
+					}
+				} else if err == nil || !strings.Contains(err.Error(), tt.wantErrContains) {
+					t.Errorf("Expected error containing %q, got %v", tt.wantErrContains, err)
+				}
+				if profiles != nil {
+					t.Errorf("Expected nil profiles, got %v", profiles)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("Expected no error, got %v", err)
+			}
+			if len(profiles) != len(tt.expectedProfiles) {
+				t.Fatalf("Expected %d profiles, got %d: %v", len(tt.expectedProfiles), len(profiles), profiles)
+			}
+			for nicID, want := range tt.expectedProfiles {
+				if got := profiles[nicID]; got != want {
+					t.Errorf("Expected profile %s for %s, got %s", want, nicID, got)
+				}
+			}
+		})
+	}
+}
+
 func TestMockNicctlClient_GetIonicDriverVersion_Error(t *testing.T) {
 	expectedError := errors.New("driver version error")
 
@@ -174,6 +255,8 @@ nics:
         status:
           physical_port: "phys1"
           operational_status: "up"
+profiles:
+  yaml-nic: "pf1_vf1"
 driver_version: "3.0.0"
 `
 
@@ -221,6 +304,14 @@ driver_version: "3.0.0"
 	}
 	if version != "3.0.0" {
 		t.Errorf("Expected driver version '3.0.0', got '%s'", version)
+	}
+
+	profiles, err := mock.GetCardProfiles()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if profiles["yaml-nic"] != "pf1_vf1" {
+		t.Errorf("Expected profile pf1_vf1 for yaml-nic, got '%s'", profiles["yaml-nic"])
 	}
 }
 

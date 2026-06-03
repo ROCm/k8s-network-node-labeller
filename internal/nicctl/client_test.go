@@ -193,3 +193,64 @@ fi
 		})
 	}
 }
+
+func TestGetCardProfiles(t *testing.T) {
+	tests := []struct {
+		name             string
+		jsonResponse     string
+		expectedProfiles map[string]string
+	}{
+		{
+			name:         "extracts profile name from first entry",
+			jsonResponse: `{"nic":[{"id":"nic1","profile":[{"name":"pf1_vf1","description":"single VF profile","device_config":"device_config_pf1_vf1_llc"}]}]}`,
+			expectedProfiles: map[string]string{
+				"nic1": "pf1_vf1",
+			},
+		},
+		{
+			name:         "handles port array from live nicctl output",
+			jsonResponse: `{"nic":[{"id":"nic1","profile":[{"name":"default","description":"Non-breakout mode 1x400G","device_config":"device_config_rdma_1x400G","port":[{"port":"1","breakout_mode":"none"}]}]}]}`,
+			expectedProfiles: map[string]string{
+				"nic1": "default",
+			},
+		},
+		{
+			name:             "skips NIC with empty profile array",
+			jsonResponse:     `{"nic":[{"id":"nic1","profile":[]}]}`,
+			expectedProfiles: map[string]string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tempDir := t.TempDir()
+			binaryPath := filepath.Join(tempDir, "profile_binary")
+			script := `#!/bin/bash
+if [ "$1" == "show" ] && [ "$2" == "card" ] && [ "$3" == "profile" ] && [ "$4" == "--json" ]; then
+	echo '` + tt.jsonResponse + `'
+	exit 0
+else
+	exit 1
+fi
+`
+			if err := os.WriteFile(binaryPath, []byte(script), 0755); err != nil {
+				t.Fatalf("Failed to create profile binary: %v", err)
+			}
+
+			client := &NicctlCommandClient{binaryPath: binaryPath}
+			profiles, err := client.GetCardProfiles()
+			if err != nil {
+				t.Fatalf("Expected no error, got %v", err)
+			}
+
+			if len(profiles) != len(tt.expectedProfiles) {
+				t.Fatalf("Expected %d profiles, got %d: %v", len(tt.expectedProfiles), len(profiles), profiles)
+			}
+			for nicID, want := range tt.expectedProfiles {
+				if got := profiles[nicID]; got != want {
+					t.Errorf("Expected profile %s for %s, got %s", want, nicID, got)
+				}
+			}
+		})
+	}
+}

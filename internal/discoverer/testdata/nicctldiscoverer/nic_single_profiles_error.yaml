@@ -12,20 +12,6 @@ nics:
         status:
           physical_port: "phys1"
           operational_status: "up"
-  - id: "nic2"
-    product_name: "Test NIC 2"
-    sku: "DSS-W400"
-    firmware_version: "1.3.4"
-    port:
-      - spec:
-          id: "port2"
-          name: "eth1"
-          port_type: "ETH"
-          port_speed: "25G"
-        status:
-          physical_port: "phys2"
-          operational_status: "up"
 profiles:
-  nic1: "pf1_vf1"
-  nic2: "hnic_pf1_vf8"
+  nic1: "__mock_profile_error__"
 driver_version: "2.1.0"

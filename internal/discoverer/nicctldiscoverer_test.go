@@ -37,11 +37,37 @@ func TestNewNicctlDiscoverer(t *testing.T) {
 	}
 }
 
+func TestGenerateProfileLabelsAll_HeterogeneousSKUKeys(t *testing.T) {
+	d := NewNicctlDiscoverer(nil)
+	cards := []nicctl.NIC{
+		{ID: "nic1", SKU: "DSS-W600"},
+		{ID: "nic2", SKU: "DSS-W400"},
+	}
+	profiles := map[string]string{
+		"nic1": "pf1_vf1",
+	}
+
+	labels := d.generateProfileLabelsAll(cards, profiles)
+
+	if len(labels) != 1 {
+		t.Fatalf("Expected 1 profile label, got %d", len(labels))
+	}
+
+	expectedKey := label.DefaultNICPrefixedKey("dss-w600.profile")
+	if labels[0].Key != expectedKey {
+		t.Errorf("Expected key %s, got %s", expectedKey, labels[0].Key)
+	}
+	if labels[0].Value != "pf1_vf1" {
+		t.Errorf("Expected value pf1_vf1, got %s", labels[0].Value)
+	}
+}
+
 func TestNicctlDiscoverer_Discover_FromYAML(t *testing.T) {
 	tests := []struct {
 		name        string
 		nicMockFile string
 		expected    map[string]string
+		absentKeys  []string
 	}{
 		{
 			name:        "No NICs",
@@ -58,6 +84,7 @@ func TestNicctlDiscoverer_Discover_FromYAML(t *testing.T) {
 				"amd.com/nic.firmware-version": "1.2.3",
 				"amd.com/nic.port-count":       "1",
 				"amd.com/nic.port-speed":       "100G",
+				"amd.com/nic.profile":          "pf1_vf1",
 			},
 		},
 		{
@@ -68,6 +95,7 @@ func TestNicctlDiscoverer_Discover_FromYAML(t *testing.T) {
 				"amd.com/nic.firmware-version": "1.2.3",
 				"amd.com/nic.port-count":       "2",
 				"amd.com/nic.port-speed":       "100G",
+				"amd.com/nic.profile":          "pf1_vf1",
 			},
 		},
 		{
@@ -79,6 +107,7 @@ func TestNicctlDiscoverer_Discover_FromYAML(t *testing.T) {
 				"amd.com/nic.port-count":       "2",
 				"amd.com/nic.port0-speed":      "100G",
 				"amd.com/nic.port1-speed":      "25G",
+				"amd.com/nic.profile":          "pf1_vf1",
 			},
 		},
 		{
@@ -94,6 +123,8 @@ func TestNicctlDiscoverer_Discover_FromYAML(t *testing.T) {
 				"amd.com/nic.dss-w400.port-count":       "1",
 				"amd.com/nic.dss-w600.port-speed":       "100G",
 				"amd.com/nic.dss-w400.port-speed":       "25G",
+				"amd.com/nic.dss-w600.profile":          "pf1_vf1",
+				"amd.com/nic.dss-w400.profile":          "hnic_pf1_vf8",
 			},
 		},
 		{
@@ -109,6 +140,8 @@ func TestNicctlDiscoverer_Discover_FromYAML(t *testing.T) {
 				"amd.com/nic.dss-w450.port-count":       "2",
 				"amd.com/nic.dss-w650.port-speed":       "100G",
 				"amd.com/nic.dss-w450.port-speed":       "25G",
+				"amd.com/nic.dss-w650.profile":          "pf1_vf1",
+				"amd.com/nic.dss-w450.profile":          "hnic_pf1_vf8",
 			},
 		},
 		{
@@ -125,7 +158,31 @@ func TestNicctlDiscoverer_Discover_FromYAML(t *testing.T) {
 				"amd.com/nic.dss-w650.port0-speed":      "100G",
 				"amd.com/nic.dss-w650.port1-speed":      "400G",
 				"amd.com/nic.dss-w450.port-speed":       "25G",
+				"amd.com/nic.dss-w650.profile":          "pf1_vf1",
+				"amd.com/nic.dss-w450.profile":          "hnic_pf1_vf8",
 			},
+		},
+		{
+			name:        "Multiple NICs Same Model Mixed Profiles",
+			nicMockFile: "nic_multiple_same_model_mixed_profiles.yaml",
+			expected: map[string]string{
+				"amd.com/nic.count":            "2",
+				"amd.com/nic.firmware-version": "1.2.3",
+				"amd.com/nic.port-count":       "2",
+				"amd.com/nic.port-speed":       "100G",
+				"amd.com/nic.profile":          "misconfig-mixed-profiles",
+			},
+		},
+		{
+			name:        "Profile discovery error continues without profile labels",
+			nicMockFile: "nic_single_profiles_error.yaml",
+			expected: map[string]string{
+				"amd.com/nic.count":            "1",
+				"amd.com/nic.firmware-version": "1.2.3",
+				"amd.com/nic.port-count":       "1",
+				"amd.com/nic.port-speed":       "100G",
+			},
+			absentKeys: []string{"amd.com/nic.profile"},
 		},
 	}
 
@@ -154,20 +211,23 @@ func TestNicctlDiscoverer_Discover_FromYAML(t *testing.T) {
 				discoveredLabels[l.Key] = l.Value
 			}
 
-			// Check if all discovered labels are managed by us
-			// This is a sanity check to ensure we are not discovering unexpected labels
 			for discoveredKey := range discoveredLabels {
 				if !label.IsManagedLabel(discoveredKey) {
 					t.Errorf("Discovered label %s is not a managed label, add to the list of managed label regexps in internal/label/regexps.go if necessary", discoveredKey)
 				}
 			}
 
-			// Check if we have all expected labels
 			for expectedKey, expectedValue := range tt.expected {
 				if actualValue, exists := discoveredLabels[expectedKey]; !exists {
 					t.Errorf("Expected label %s not found", expectedKey)
 				} else if actualValue != expectedValue {
 					t.Errorf("Expected label %s=%s, got %s=%s", expectedKey, expectedValue, expectedKey, actualValue)
+				}
+			}
+
+			for _, key := range tt.absentKeys {
+				if _, exists := discoveredLabels[key]; exists {
+					t.Errorf("Expected label %s to be absent", key)
 				}
 			}
 		})
