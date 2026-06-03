@@ -26,16 +26,22 @@ import (
 // Ensure that MockNicctlClient implements NicctlClient interface
 var _ NicctlClient = (*MockNicctlClient)(nil)
 
+// ProfileErrorTrigger is a test-only profile value in YAML fixtures that causes
+// MockNicctlClient.GetCardProfiles to return an error (simulates nicctl failure).
+const ProfileErrorTrigger = "__mock_profile_error__"
+
 // TestData represents the structure of test data in YAML files
 type TestData struct {
-	NICs          []NIC  `yaml:"nics" json:"nics"`
-	DriverVersion string `yaml:"driver_version" json:"driver_version"`
+	NICs          []NIC             `yaml:"nics" json:"nics"`
+	DriverVersion string            `yaml:"driver_version" json:"driver_version"`
+	Profiles      map[string]string `yaml:"profiles" json:"profiles"`
 }
 
 // MockNicctlClient is a mock implementation of NicctlClient for testing
 type MockNicctlClient struct {
 	GetCardsWithPortsFunc     func() ([]NIC, error)
 	GetIonicDriverVersionFunc func() (string, error)
+	GetCardProfilesFunc       func() (map[string]string, error)
 	testData                  *TestData
 }
 
@@ -59,6 +65,22 @@ func (m *MockNicctlClient) GetIonicDriverVersion() (string, error) {
 		return m.testData.DriverVersion, nil
 	}
 	return "", fmt.Errorf("failed to get Ionic driver version")
+}
+
+// GetCardProfiles implements the NicctlClient interface
+func (m *MockNicctlClient) GetCardProfiles() (map[string]string, error) {
+	if m.GetCardProfilesFunc != nil {
+		return m.GetCardProfilesFunc()
+	}
+	if m.testData != nil && m.testData.Profiles != nil {
+		for _, profile := range m.testData.Profiles {
+			if profile == ProfileErrorTrigger {
+				return nil, fmt.Errorf("profile command failed")
+			}
+		}
+		return m.testData.Profiles, nil
+	}
+	return map[string]string{}, nil
 }
 
 // NewMockNicctlClient creates a new MockNicctlClient

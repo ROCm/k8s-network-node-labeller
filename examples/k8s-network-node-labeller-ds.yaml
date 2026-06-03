@@ -56,6 +56,9 @@ spec:
           mountPath: /lib/modules
         - name: opt-amd
           mountPath: /opt/amd
+        - name: ainic-config
+          mountPath: /etc/amd/ainic
+          readOnly: true
         env:
         - name: DS_NODE_NAME
           valueFrom:
@@ -81,4 +84,8 @@ spec:
       - name: opt-amd
         hostPath:
           path: /opt/amd
+          type: Directory
+      - name: ainic-config
+        hostPath:
+          path: /etc/amd/ainic
           type: Directory

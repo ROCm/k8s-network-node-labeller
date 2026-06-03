@@ -18,6 +18,7 @@ package discoverer
 
 import (
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	"github.com/ROCm/k8s-network-node-labeller/internal/label"
@@ -66,6 +67,14 @@ func (d *NicctlDiscoverer) Discover() ([]label.Label, error) {
 	// Add port speed labels
 	portSpeedLabels := d.generatePortSpeedLabelsAll(cards)
 	labels = append(labels, portSpeedLabels...)
+
+	profiles, err := d.client.GetCardProfiles()
+	if err != nil {
+		slog.Warn("Failed to get card profiles, skipping profile labels", "error", err)
+	} else {
+		profileLabels := d.generateProfileLabelsAll(cards, profiles)
+		labels = append(labels, profileLabels...)
+	}
 
 	return labels, nil
 }
@@ -128,6 +137,41 @@ func (d *NicctlDiscoverer) generateFirmwareVersionLabelsAll(cards []nicctl.NIC) 
 
 		firmwareLabel := label.NewLabel(key, firmwareVersion)
 		labels = append(labels, firmwareLabel)
+	}
+
+	return labels
+}
+
+// generateProfileLabelsAll generates labels for NIC profile information.
+// If NICs of the same SKU have different profiles, the value is set to
+// "misconfig-mixed-profiles" to flag the misconfiguration.
+func (d *NicctlDiscoverer) generateProfileLabelsAll(cards []nicctl.NIC, profiles map[string]string) []label.Label {
+	var labels []label.Label
+
+	skuToProfile := make(map[string]string)
+	for _, nic := range cards {
+		normalizedSKU := label.NormalizeString(nic.SKU)
+		profile := profiles[nic.ID]
+		if existing, ok := skuToProfile[normalizedSKU]; !ok {
+			skuToProfile[normalizedSKU] = profile
+		} else if existing != profile && profile != "" {
+			skuToProfile[normalizedSKU] = "misconfig-mixed-profiles"
+		}
+	}
+
+	for sku, profileName := range skuToProfile {
+		if profileName == "" {
+			continue
+		}
+
+		var key string
+		if len(skuToProfile) == 1 {
+			key = label.DefaultNICPrefixedKey("profile")
+		} else {
+			key = label.DefaultNICPrefixedKey(sku + ".profile")
+		}
+
+		labels = append(labels, label.NewLabel(key, profileName))
 	}
 
 	return labels

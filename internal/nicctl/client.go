@@ -64,10 +64,28 @@ type VersionResponse struct {
 	} `json:"version" yaml:"version"`
 }
 
+// NICProfile represents a profile entry from nicctl show card profile.
+// Only name is used; other fields in nicctl output are ignored.
+type NICProfile struct {
+	Name string `json:"name" yaml:"name"`
+}
+
+// NICWithProfile represents a NIC entry in the profile command response
+type NICWithProfile struct {
+	ID      string       `json:"id" yaml:"id"`
+	Profile []NICProfile `json:"profile" yaml:"profile"`
+}
+
+// NICProfileResponse represents the JSON response from nicctl show card profile
+type NICProfileResponse struct {
+	NICs []NICWithProfile `json:"nic" yaml:"nic"`
+}
+
 // NicctlClient defines the interface for interacting with nicctl
 type NicctlClient interface {
 	GetCardsWithPorts() ([]NIC, error)
 	GetIonicDriverVersion() (string, error)
+	GetCardProfiles() (map[string]string, error)
 }
 
 // NicctlCommandClient implements NicctlClient using actual nicctl commands
@@ -182,4 +200,28 @@ func (c *NicctlCommandClient) GetIonicDriverVersion() (string, error) {
 	}
 
 	return response.Version.IonicDriver, nil
+}
+
+// GetCardProfiles retrieves the active profile name for each NIC card
+func (c *NicctlCommandClient) GetCardProfiles() (map[string]string, error) {
+	cmd := exec.Command(c.binaryPath, "show", "card", "profile", "--json")
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to %s: %w", cmd.String(), err)
+	}
+
+	var response NICProfileResponse
+	if err := json.Unmarshal(output, &response); err != nil {
+		return nil, fmt.Errorf("failed to parse nicctl card profile JSON output: %w", err)
+	}
+
+	profiles := make(map[string]string, len(response.NICs))
+	for _, nic := range response.NICs {
+		if len(nic.Profile) == 0 {
+			continue
+		}
+		profiles[nic.ID] = nic.Profile[0].Name
+	}
+
+	return profiles, nil
 }

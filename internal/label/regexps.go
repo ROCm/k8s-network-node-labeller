@@ -33,6 +33,10 @@ var (
 		`firmware-version`,
 		`.*\.firmware-version`, // For SKU specific firmware version labels
 
+		// Profile labels
+		`profile`,
+		`.*\.profile`, // For SKU specific profile labels
+
 		// Driver info labels
 		`driver-version`,
 		`.*\.driver-version`,

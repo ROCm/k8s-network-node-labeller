@@ -69,6 +69,16 @@ func TestIsManagedLabel(t *testing.T) {
 			expected: true,
 		},
 		{
+			name:     "valid profile label",
+			key:      "amd.com/nic.profile",
+			expected: true,
+		},
+		{
+			name:     "valid sku specific profile label",
+			key:      "amd.com/nic.dss-w600.profile",
+			expected: true,
+		},
+		{
 			name:     "invalid custom label",
 			key:      "custom.label",
 			expected: false,
