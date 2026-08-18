@@ -1,5 +1,21 @@
 # Release Notes
 
+## v1.3.0
+
+### Release Highlights
+
+- Multi-version nicctl bundling with automatic firmware detection at container startup
+- Images now support up to 5 nicctl versions, enabling a single image to work across clusters with mixed NIC firmware versions
+
+### Hardware Support
+
+- **AMD Pensando™ Pollara AI NIC**
+  - Supported AINIC firmware: `1.117.5-a-77`, `1.117.5-a-147`
+
+### Platform Support
+
+- **Kubernetes 1.29+**
+
 ## v1.2.0
 
 ### Release Highlights

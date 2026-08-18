@@ -10,6 +10,10 @@ This page explains how to install AMD Kubernetes Network Node Labeller using Hel
 - Nodes equipped with AMD AINICs
 - AMD AINIC drivers installed on the nodes
 
+### Multi-Version Image Support
+
+Starting with v1.3.0, container images support multiple nicctl versions bundled together. This allows a single image to work across clusters with different NIC firmware versions through automatic firmware detection at startup. See the [README Multi-Version nicctl Support](../../README.md#multi-version-nicctl-support) section for build details.
+
 ## Installation
 
 ### Add the AMD Helm Repository
