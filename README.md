@@ -35,13 +35,14 @@ For detailed installation instructions and configuration options, refer to the [
 
 ## Compatibility Matrix
 
-The following matrix summarizes supported NICs and the required AINIC firmware / tooling for each container image version.
+The following matrix summarizes supported NICs and the required AINIC firmware / tooling for each container image version. Starting with v1.3.0, images support bundling multiple nicctl versions for cross-firmware compatibility.
 
-| Image Version | AINIC Firmware Version | Supported NICs |
-| --- | --- | --- |
-| `v1.0.0` | N/A (host `nicctl`) | Pollara 400 |
-| `v1.1.0` | `1.117.5-a-56` | Pollara 400 |
-| `v1.2.0` | `1.117.5-a-56`<br>`1.117.5-a-77` | Pollara 400 |
+| Image Version | AINIC Firmware Version                      | Supported NICs |
+| ------------- | ------------------------------------------- | -------------- |
+| `v1.0.0`      | N/A (host `nicctl`)                         | Pollara 400    |
+| `v1.1.0`      | `1.117.5-a-56`                              | Pollara 400    |
+| `v1.2.0`      | `1.117.5-a-56`<br>`1.117.5-a-77`            | Pollara 400    |
+| `v1.3.0+`     | `1.117.5-a-77`<br>`1.117.5-a-147` (up to 5) | Pollara 400    |
 
 ## Labels
 The Labeller currently creates node labels for the following AMD AINIC properties:
@@ -129,13 +130,57 @@ To build a Docker image for the project, run:
 ```bash
 make docker-build
 ```
-This will build the Docker image using the current configuration.
+This will build the Docker image using the current configuration, bundling the default nicctl versions (`1.117.5-a-77` and `1.117.5-a-147`).
 
 To push the built Docker image to the configured registry, use:
 
 ```bash
 make docker-push
 ```
+
+### Multi-Version nicctl Support
+
+The image supports bundling multiple nicctl versions for cross-firmware compatibility. The container automatically detects the NIC firmware version at startup and selects the matching binary.
+
+**Build Arguments:**
+
+- `AINIC_VERSIONS`: Comma-separated list of nicctl versions to bundle (max 5)
+  - Default: `1.117.5-a-77,1.117.5-a-147`
+  - Example: `make docker-build AINIC_VERSIONS="1.117.5-a-56,1.117.5-a-77,1.117.5-a-147"`
+
+- `BOOTSTRAP_VERSION`: Version to install uncompressed (must be in AINIC_VERSIONS)
+  - Default: `1.117.5-a-147`
+  - Example: `make docker-build BOOTSTRAP_VERSION="1.117.5-a-147"`
+
+**Examples:**
+
+Single-version build:
+```bash
+make docker-build AINIC_VERSIONS=1.117.5-a-147
+```
+
+Multi-version with custom versions:
+```bash
+make docker-build AINIC_VERSIONS=1.117.5-a-56,1.117.5-a-77,1.117.5-a-147 BOOTSTRAP_VERSION=1.117.5-a-147
+```
+
+**Image Size Reference:**
+- 1 version: ~80 MB
+- 2 versions: ~88 MB (default)
+- 5 versions (max): ~113 MB
+
+Each additional version adds ~8.4 MB (compressed with xz).
+
+**Runtime Firmware Detection:**
+
+The `nicctl-setup.sh` script handles version selection at container startup:
+
+1. For single-version builds: passes directly to the Go binary
+2. For multi-version builds:
+   - Detects NIC firmware version via `nicctl-bootstrap show firmware`
+   - Selects matching binary from bundled versions
+   - Decompresses on-demand if needed
+   - Falls back to bootstrap if no exact match found
 
 ### Configurable Environment Variables
 You can configure the image name, tag, and registry using environment variables:

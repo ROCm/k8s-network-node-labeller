@@ -27,8 +27,8 @@ HELM_OUTPUT_FILE_PREFIX ?= k8s-network-node-labeller-helm-k8s
 HELM_OUTPUT_FILE_NAME ?= $(HELM_OUTPUT_FILE_PREFIX)-$(PROJECT_VERSION).tgz
 CHART_DEST ?= $(HELM_CHART_DIR)/$(HELM_OUTPUT_FILE_NAME)
 
-AINIC_VERSION ?= 1.117.5-a-56
-DOCKER_ARGS ?= AINIC_VERSION=$(AINIC_VERSION)
+AINIC_VERSIONS ?= 1.117.5-a-77,1.117.5-a-147
+BOOTSTRAP_VERSION ?= 1.117.5-a-147
 
 GO_BUILD_OPTS ?=
 
@@ -63,8 +63,10 @@ create-dirs:
 .PHONY: docker-build
 docker-build:
 	$(eval DOCKER_LABELS_OPTION := $(if $(DOCKER_LABELS),--label "$(DOCKER_LABELS)"))
-	$(eval DOCKER_ARGS_OPTION := $(if $(DOCKER_ARGS),--build-arg "$(DOCKER_ARGS)"))
-	docker build $(DOCKER_LABELS_OPTION) $(DOCKER_ARGS_OPTION) -t ${IMG} .
+	docker build $(DOCKER_LABELS_OPTION) \
+		--build-arg AINIC_VERSIONS=$(AINIC_VERSIONS) \
+		$(if $(BOOTSTRAP_VERSION),--build-arg BOOTSTRAP_VERSION=$(BOOTSTRAP_VERSION)) \
+		-t ${IMG} .
 
 .PHONY: docker-save
 docker-save: create-dirs
