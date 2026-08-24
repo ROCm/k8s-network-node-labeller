@@ -18,10 +18,20 @@ package nicctl
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 )
+
+func stderrFromError(err error) string {
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) && len(exitErr.Stderr) > 0 {
+		return string(exitErr.Stderr)
+	}
+	return ""
+}
 
 // NIC represents a network interface card
 type NIC struct {
@@ -131,12 +141,18 @@ func validateBinary(binaryPath string) error {
 	return nil
 }
 
-// validateCardList checks if nicctl can list cards and produce valid JSON output
+// validateCardList checks if nicctl can list cards and produce valid JSON output.
+// nicctl may return non-zero if some NICs fail (e.g. IPC errors) while still
+// producing valid JSON for the NICs that succeed.
 func validateCardList(binaryPath string) error {
 	cmd := exec.Command(binaryPath, "show", "card", "-j")
-	output, err := cmd.CombinedOutput()
+	output, err := cmd.Output()
 	if err != nil {
-		return fmt.Errorf("failed to execute nicctl command %s: %w\nOutput: %s", cmd.String(), err, string(output))
+		if len(output) == 0 {
+			return fmt.Errorf("failed to execute nicctl command %s: %w\nStderr: %s", cmd.String(), err, stderrFromError(err))
+		}
+		slog.Warn("nicctl command returned error but produced output, proceeding with partial data",
+			"command", cmd.String(), "error", err, "stderr", stderrFromError(err))
 	}
 
 	var testResponse NICResponse
@@ -147,13 +163,19 @@ func validateCardList(binaryPath string) error {
 	return nil
 }
 
-// GetCardsWithPorts retrieves all NIC cards information with ports merged
+// GetCardsWithPorts retrieves all NIC cards information with ports merged.
+// nicctl may return non-zero if some NICs fail while still producing valid
+// JSON for the NICs that succeed.
 func (c *NicctlCommandClient) GetCardsWithPorts() ([]NIC, error) {
 	// Get card information
 	cardCmd := exec.Command(c.binaryPath, "show", "card", "--json")
 	cardOutput, err := cardCmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("failed to %s: %w", cardCmd.String(), err)
+		if len(cardOutput) == 0 {
+			return nil, fmt.Errorf("failed to %s: %w\nStderr: %s", cardCmd.String(), err, stderrFromError(err))
+		}
+		slog.Warn("nicctl command returned error but produced output, proceeding with partial data",
+			"command", cardCmd.String(), "error", err, "stderr", stderrFromError(err))
 	}
 
 	var cardResponse NICResponse
@@ -165,7 +187,11 @@ func (c *NicctlCommandClient) GetCardsWithPorts() ([]NIC, error) {
 	portCmd := exec.Command(c.binaryPath, "show", "port", "--json")
 	portOutput, err := portCmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("failed to %s: %w", portCmd.String(), err)
+		if len(portOutput) == 0 {
+			return nil, fmt.Errorf("failed to %s: %w\nStderr: %s", portCmd.String(), err, stderrFromError(err))
+		}
+		slog.Warn("nicctl command returned error but produced output, proceeding with partial data",
+			"command", portCmd.String(), "error", err, "stderr", stderrFromError(err))
 	}
 
 	var portResponse NICResponse
@@ -202,12 +228,18 @@ func (c *NicctlCommandClient) GetIonicDriverVersion() (string, error) {
 	return response.Version.IonicDriver, nil
 }
 
-// GetCardProfiles retrieves the active profile name for each NIC card
+// GetCardProfiles retrieves the active profile name for each NIC card.
+// nicctl may return non-zero if some NICs fail while still producing valid
+// JSON for the NICs that succeed.
 func (c *NicctlCommandClient) GetCardProfiles() (map[string]string, error) {
 	cmd := exec.Command(c.binaryPath, "show", "card", "profile", "--json")
 	output, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("failed to %s: %w", cmd.String(), err)
+		if len(output) == 0 {
+			return nil, fmt.Errorf("failed to %s: %w\nStderr: %s", cmd.String(), err, stderrFromError(err))
+		}
+		slog.Warn("nicctl command returned error but produced output, proceeding with partial data",
+			"command", cmd.String(), "error", err, "stderr", stderrFromError(err))
 	}
 
 	var response NICProfileResponse
