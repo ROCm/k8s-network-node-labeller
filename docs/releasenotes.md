@@ -1,11 +1,15 @@
 # Release Notes
 
-## v1.3.0
+## v1.2.1
 
 ### Release Highlights
 
-- Multi-version nicctl bundling with automatic firmware detection at container startup
-- Images now support up to 5 nicctl versions, enabling a single image to work across clusters with mixed NIC firmware versions
+- Multi-version nicctl bundling with automatic firmware detection at container startup, enabling a single image to work across clusters with mixed NIC firmware versions (up to 5)
+- Added compatibility with Red Hat OpenShift Container Platform 4.21
+- Improved handling of partial NIC failures during firmware detection, ensuring the labeller continues operation even when individual NICs fail
+- Added checksum validation for downloaded nicctl binaries during image build
+- Fixed labeller crashes when nodes have a mix of healthy and unhealthy NICs
+- Fixed JSON parsing errors caused by stderr mixing into stdout on partial NIC failures
 
 ### Hardware Support
 
@@ -15,6 +19,7 @@
 ### Platform Support
 
 - **Kubernetes 1.29+**
+- **OpenShift 4.21**
 
 ## v1.2.0
 

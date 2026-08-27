@@ -28,21 +28,21 @@ helm repo update
 helm install amd-network-node-labeller rocm-network-nl/network-node-labeller-charts \
   --namespace kube-amd-network \
   --create-namespace \
-  --version v1.2.0
+  --version v1.2.1
 ```
 
 For detailed installation instructions and configuration options, refer to the [Helm Installation Guide](./docs/installation/kubernetes-helm.md).
 
 ## Compatibility Matrix
 
-The following matrix summarizes supported NICs and the required AINIC firmware / tooling for each container image version. Starting with v1.3.0, images support bundling multiple nicctl versions for cross-firmware compatibility.
+The following matrix summarizes supported NICs and the required AINIC firmware / tooling for each container image version.
 
-| Image Version | AINIC Firmware Version                      | Supported NICs |
-| ------------- | ------------------------------------------- | -------------- |
-| `v1.0.0`      | N/A (host `nicctl`)                         | Pollara 400    |
-| `v1.1.0`      | `1.117.5-a-56`                              | Pollara 400    |
-| `v1.2.0`      | `1.117.5-a-56`<br>`1.117.5-a-77`            | Pollara 400    |
-| `v1.3.0+`     | `1.117.5-a-77`<br>`1.117.5-a-147` (up to 5) | Pollara 400    |
+| AINIC Firmware Version                      | Image Version | Supported NICs | Supported Platforms                    |
+| ------------------------------------------- | ------------- | -------------- | -------------------------------------- |
+| N/A (host `nicctl`)                         | `v1.0.0`      | Pollara 400    | Kubernetes 1.29+                       |
+| `1.117.5-a-56`                              | `v1.1.0`      | Pollara 400    | Kubernetes 1.29+                       |
+| `1.117.5-a-56`<br>`1.117.5-a-77`            | `v1.2.0`      | Pollara 400    | Kubernetes 1.29+                       |
+| `1.117.5-a-77`<br>`1.117.5-a-147` (up to 5) | `v1.2.1+`     | Pollara 400    | Kubernetes 1.29+, OpenShift 4.21       |
 
 ## Labels
 The Labeller currently creates node labels for the following AMD AINIC properties:
