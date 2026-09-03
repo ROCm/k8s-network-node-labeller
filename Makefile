@@ -108,6 +108,12 @@ build: create-dirs
 fmt:
 	go fmt ./...
 
+.PHONY: vet
+vet:
+	$(info Running go vet...)
+	go vet ./...
+	$(info Done!)
+
 .PHONY: test
 test:
 	$(info Running tests...)
@@ -129,13 +135,12 @@ helm-update-meta:
 helm-lint:
 	helm lint $(HELM_CHART_DIR)
 
+GOLANGCI_LINT = $(PROJECT_DIR)/bin/golangci-lint
+GOLANGCI_LINT_VERSION ?= v2.7.2
 .PHONY: lint
 lint:
-	@[ -f $(PROJECT_DIR)/bin/golangci-lint ] || { \
-		echo "Installing golangci-lint to $(PROJECT_DIR)/bin..." ;\
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(PROJECT_DIR)/bin v2.7.2 ;\
-	}
-	$(PROJECT_DIR)/bin/golangci-lint run ./...
+	$(call go-get-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION))
+	$(GOLANGCI_LINT) run ./...
 
 HELMDOCS = $(shell pwd)/bin/helm-docs
 .PHONY: helm-docs
