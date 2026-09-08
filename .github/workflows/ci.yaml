@@ -7,11 +7,25 @@ on:
   pull_request:
     branches:
       - main
+      # Release branches exist (release-v1.2.0, release-v1.2.1) and previously
+      # got no CI at all, which is where backports and release-prep land.
+      - 'release-*'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# No job needs write access or secrets. Keeping this read-only means pull
+# requests from forks are safe to run.
+permissions:
+  contents: read
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-22.04
+    timeout-minutes: 20
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,6 +47,7 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-22.04
+    timeout-minutes: 20
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,9 +60,42 @@ jobs:
       - name: Run unit tests
         run: make test
 
+  vet:
+    name: Vet
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run go vet
+        run: make vet
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run golangci-lint
+        run: make lint
+
   docker-build:
     name: Docker Build
     runs-on: ubuntu-22.04
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -61,6 +109,7 @@ jobs:
   helm-build:
     name: Helm Build
     runs-on: ubuntu-22.04
+    timeout-minutes: 20
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
