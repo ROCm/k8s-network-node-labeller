@@ -59,11 +59,12 @@ amd.com/nic.pollara-1q400p.product-name=POLLARA_1x400G_QSFP112
 
 The following matrix summarizes supported NICs and the required AINIC firmware / tooling for each container image version.
 
-| Image Version | AINIC Firmware Version           | Supported NICs |
-| ------------- | -------------------------------- | -------------- |
-| `v1.0.0`      | N/A (host `nicctl`)              | Pollara 400    |
-| `v1.1.0`      | `1.117.5-a-56`                   | Pollara 400    |
-| `v1.2.0`      | `1.117.5-a-56`<br>`1.117.5-a-77` | Pollara 400    |
+| AINIC Firmware Version                                 | Image Version | Supported NICs | Supported Platforms                    |
+| ------------------------------------------------------ | ------------- | -------------- | -------------------------------------- |
+| N/A (host `nicctl`)                                    | `v1.0.0`      | Pollara 400    | Kubernetes 1.29+                       |
+| `1.117.5-a-56`                                         | `v1.1.0`      | Pollara 400    | Kubernetes 1.29+                       |
+| `1.117.5-a-56`<br>`1.117.5-a-77`                       | `v1.2.0`      | Pollara 400    | Kubernetes 1.29+                       |
+| `1.117.5-a-77`<br>`1.117.5-a-147`<br>`1.117.5-a-196`   | `v1.2.1`      | Pollara 400    | Kubernetes 1.29+, OpenShift 4.21       |
 
 **Note:** When running on VMs, the labeller has limited access to hardware information and will only publish Product Name, Driver Version, and Driver Name labels. Hardware-specific properties like port count, port speed, firmware version, and profile may not be available in virtualized environments.
 
@@ -98,7 +99,7 @@ helm repo update
 helm install amd-network-node-labeller rocm-network-nl/network-node-labeller-charts \
   --namespace kube-amd-network \
   --create-namespace \
-  --version v1.2.0
+  --version v1.2.1
 ```
 
 For detailed installation instructions, see the [Kubernetes (Helm) Installation Guide](installation/kubernetes-helm.md).
